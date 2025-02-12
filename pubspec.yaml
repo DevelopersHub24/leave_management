@@ -35,12 +35,16 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   flutter_animate: ^4.5.2
+  http: ^0.13.5
+
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
   flutter_svg: ^1.0.3
+  table_calendar: ^3.0.0 
+
 
 
 # For information on the generic Dart part of this file, see the
@@ -54,9 +58,15 @@ flutter:
     - assets/svgs/user.svg
     - assets/svgs/password.svg
     - assets/svgs/home.svg
-    - assets/svgs/report.svg
+    - assets/svgs/apply.svg
     - assets/svgs/notification.svg
     - assets/svgs/profile.svg
+    - assets/svgs/report.svg
+    - assets/svgs/reset.svg
+    - assets/svgs/info.svg
+    - assets/images/profile.jpg
+    - assets/images/bg.jpeg
+
   fonts:
     - family: Raleway-Medium
       fonts:
