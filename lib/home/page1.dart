@@ -151,7 +151,7 @@ class HomePage extends StatelessWidget {
                       Icon(Icons.location_on, color: Colors.grey[400]),
                       const SizedBox(width: 8),
                       const Text(
-                        'Balad Trade Center II',
+                        'Salzer Electronics Limited Unit II',
                         style: TextStyle(
                           color: Colors.white,
                         ),

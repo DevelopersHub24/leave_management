@@ -22,60 +22,118 @@ class _ApplyPageState extends State<ApplyPage> {
   }
 
   void _showCalendarPopup(String option) {
-    DateTime? tempSelectedDay = _selectedDay;
+    DateTime? selectedDate;
+    TimeOfDay? outTime;
+    TimeOfDay? inTime;
 
     showDialog(
       context: context,
       builder: (context) {
         return StatefulBuilder(
-          // Wrap the dialog with StatefulBuilder
           builder: (context, setDialogState) {
             return AlertDialog(
               backgroundColor: Colors.black,
               title: Text(
-                'Select Date for $option',
+                'Apply for $option',
                 style: const TextStyle(color: Colors.white),
               ),
               content: SizedBox(
-                width: 300, // Set a fixed width
-                height: 400, // Set a fixed height
-                child: TableCalendar(
-                  focusedDay: _focusedDay,
-                  firstDay: DateTime.utc(2000, 1, 1),
-                  lastDay: DateTime.utc(2030, 12, 31),
-                  selectedDayPredicate: (day) {
-                    return isSameDay(tempSelectedDay, day);
-                  },
-                  onDaySelected: (selectedDay, focusedDay) {
-                    setDialogState(() {
-                      // Use setDialogState to update UI inside the dialog
-                      tempSelectedDay = selectedDay;
-                    });
-                  },
-                  calendarStyle: CalendarStyle(
-                    selectedDecoration: BoxDecoration(
-                      color: Colors.teal[400],
-                      shape: BoxShape.circle,
+                width: 300,
+                height: 500,
+                child: Scrollbar(
+                  thumbVisibility: true,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // DATE SELECTION
+                        Text("Select Date",
+                            style: TextStyle(color: Colors.white)),
+                        SizedBox(
+                          height: 400,
+                          child: TableCalendar(
+                            focusedDay: _focusedDay,
+                            firstDay: DateTime.utc(2000, 1, 1),
+                            lastDay: DateTime.utc(2030, 12, 31),
+                            selectedDayPredicate: (day) =>
+                                isSameDay(selectedDate, day),
+                            onDaySelected: (selectedDay, focusedDay) {
+                              setDialogState(() {
+                                selectedDate = selectedDay;
+                              });
+                            },
+                            calendarStyle: CalendarStyle(
+                              selectedDecoration: BoxDecoration(
+                                color: Colors.teal[400],
+                                shape: BoxShape.circle,
+                              ),
+                              todayDecoration: BoxDecoration(
+                                color: Colors.teal.withOpacity(0.6),
+                                shape: BoxShape.circle,
+                              ),
+                              defaultTextStyle: TextStyle(color: Colors.white),
+                              weekendTextStyle: TextStyle(color: Colors.red),
+                              outsideTextStyle: TextStyle(color: Colors.grey),
+                            ),
+                            headerStyle: HeaderStyle(
+                              titleCentered: true,
+                              formatButtonVisible: false,
+                              titleTextStyle: TextStyle(color: Colors.white),
+                              leftChevronIcon:
+                                  Icon(Icons.chevron_left, color: Colors.white),
+                              rightChevronIcon: Icon(Icons.chevron_right,
+                                  color: Colors.white),
+                            ),
+                            daysOfWeekStyle: DaysOfWeekStyle(
+                              weekdayStyle: TextStyle(color: Colors.white),
+                              weekendStyle: TextStyle(color: Colors.red),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+
+                        // OUT TIME PICKER
+                        ElevatedButton(
+                          onPressed: () async {
+                            TimeOfDay? pickedTime = await showTimePicker(
+                              context: context,
+                              initialTime: TimeOfDay.now(),
+                            );
+                            if (pickedTime != null) {
+                              setDialogState(() {
+                                outTime = pickedTime;
+                              });
+                            }
+                          },
+                          child: Text(
+                            outTime == null
+                                ? "Select Out Time"
+                                : "Out Time: ${outTime!.format(context)}",
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+
+                        // IN TIME PICKER
+                        ElevatedButton(
+                          onPressed: () async {
+                            TimeOfDay? pickedTime = await showTimePicker(
+                              context: context,
+                              initialTime: TimeOfDay.now(),
+                            );
+                            if (pickedTime != null) {
+                              setDialogState(() {
+                                inTime = pickedTime;
+                              });
+                            }
+                          },
+                          child: Text(
+                            inTime == null
+                                ? "Select In Time"
+                                : "In Time: ${inTime!.format(context)}",
+                          ),
+                        ),
+                      ],
                     ),
-                    todayDecoration: BoxDecoration(
-                      color: Colors.teal.withOpacity(0.6),
-                      shape: BoxShape.circle,
-                    ),
-                    defaultTextStyle: const TextStyle(color: Colors.white),
-                    weekendTextStyle: const TextStyle(color: Colors.red),
-                  ),
-                  headerStyle: HeaderStyle(
-                    titleCentered: true,
-                    formatButtonVisible: false,
-                    titleTextStyle: const TextStyle(color: Colors.white),
-                    leftChevronIcon:
-                        Icon(Icons.chevron_left, color: Colors.white),
-                    rightChevronIcon:
-                        Icon(Icons.chevron_right, color: Colors.white),
-                  ),
-                  daysOfWeekStyle: DaysOfWeekStyle(
-                    weekdayStyle: const TextStyle(color: Colors.white),
-                    weekendStyle: const TextStyle(color: Colors.red),
                   ),
                 ),
               ),
@@ -89,18 +147,27 @@ class _ApplyPageState extends State<ApplyPage> {
                 ),
                 ElevatedButton(
                   onPressed: () {
+                    if (selectedDate == null ||
+                        outTime == null ||
+                        inTime == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text("Please select all required fields")),
+                      );
+                      return;
+                    }
+
                     setState(() {
-                      _selectedDay = tempSelectedDay;
+                      _selectedDay = selectedDate;
                     });
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                          content: Text('$option requested for $_selectedDay')),
+                          content: Text(
+                              '$option requested on $selectedDate, Out: ${outTime!.format(context)}, In: ${inTime!.format(context)}')),
                     );
                     Navigator.pop(context);
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
-                  ),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
                   child: const Text('Request',
                       style: TextStyle(color: Colors.white)),
                 ),
@@ -156,14 +223,23 @@ class _ApplyPageState extends State<ApplyPage> {
                       color: Colors.teal.withOpacity(0.6),
                       shape: BoxShape.circle,
                     ),
-                    defaultTextStyle: const TextStyle(color: Colors.white),
-                    weekendTextStyle: const TextStyle(color: Colors.red),
+                    defaultTextStyle: const TextStyle(
+                      color: Colors.white, // Makes regular dates white
+                      fontSize: 16, // Increase font size if needed
+                    ),
+                    weekendTextStyle: const TextStyle(
+                      color: Colors.red, // Makes weekend dates red
+                      fontSize: 16,
+                    ),
+                    outsideDaysVisible:
+                        false, // Hide dates outside current month
                   ),
                   headerStyle: HeaderStyle(
                     titleCentered: true,
                     formatButtonVisible: false,
                     titleTextStyle: const TextStyle(color: Colors.white),
-                    leftChevronIcon: Icon(Icons.chevron_left, color: Colors.white),
+                    leftChevronIcon:
+                        Icon(Icons.chevron_left, color: Colors.white),
                     rightChevronIcon:
                         Icon(Icons.chevron_right, color: Colors.white),
                   ),
@@ -178,8 +254,8 @@ class _ApplyPageState extends State<ApplyPage> {
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  child:
-                      const Text('Cancel', style: TextStyle(color: Colors.white)),
+                  child: const Text('Cancel',
+                      style: TextStyle(color: Colors.white)),
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -196,8 +272,8 @@ class _ApplyPageState extends State<ApplyPage> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.teal,
                   ),
-                  child:
-                      const Text('Request', style: TextStyle(color: Colors.white)),
+                  child: const Text('Request',
+                      style: TextStyle(color: Colors.white)),
                 ),
               ],
             );
@@ -212,7 +288,7 @@ class _ApplyPageState extends State<ApplyPage> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Apply Options'),
+        title: const Text('Apply'),
         centerTitle: true,
         backgroundColor: Colors.teal,
         automaticallyImplyLeading: false, // Removes the back button
